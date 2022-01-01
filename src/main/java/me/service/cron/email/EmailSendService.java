@@ -1,9 +1,6 @@
 package me.service.cron.email;
 
 import lombok.extern.slf4j.Slf4j;
-import me.service.cron.email.EmailConfig;
-import me.service.cron.email.EmailContent;
-import me.service.cron.email.VerifyEmail;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;

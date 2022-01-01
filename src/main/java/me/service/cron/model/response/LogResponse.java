@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import me.service.cron.contents.CompareType;
 import me.service.cron.contents.TaskType;
+
+import java.util.List;
 
 /**
  * 描述：
@@ -45,9 +46,6 @@ public class LogResponse {
     @ApiModelProperty("执行名称")
     private String command;
 
-    @ApiModelProperty("参数")
-    private String params;
-
     @ApiModelProperty("执行开始时间")
     private Long startTime;
 
@@ -63,20 +61,14 @@ public class LogResponse {
     @ApiModelProperty("执行结果")
     private String executeResult;
 
-    @ApiModelProperty("比较类型")
-    private CompareType compareType;
-
-    @ApiModelProperty("比较是否忽略大小写")
-    private Boolean compareIgnoreCase;
-
-    @ApiModelProperty("预期值")
-    private String expectedValue;
-
     @ApiModelProperty("邮箱")
     private String email;
 
-    @ApiModelProperty("邮件消息")
-    private String emailMessage;
+    @ApiModelProperty("邮件成功消息")
+    private String emailSuccessMessage;
+
+    @ApiModelProperty("邮件失败消息")
+    private String emailErrorMessage;
 
     @ApiModelProperty("邮件结果")
     private String emailResult;

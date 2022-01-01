@@ -93,9 +93,10 @@ public class DynamicScheduleTask implements SchedulingConfigurer {
     }
 
     public void isValid(String cron) {
-        boolean valid = CronUtils.isValid(cron);
-        if (!valid) {
-            throw new TaskException("无效的cron表达式");
+        try{
+            CronUtils.isValid(cron);
+        }catch (Exception e){
+            throw new TaskException(e.getMessage());
         }
     }
 

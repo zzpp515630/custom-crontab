@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import me.service.cron.model.GetResult;
 import me.service.cron.model.ListResult;
 import me.service.cron.model.Result;
-import me.service.cron.model.query.PageQuery;
 import me.service.cron.model.query.TaskQuery;
 import me.service.cron.model.request.CreateTaskRequest;
 import me.service.cron.model.request.ModifyTaskRequest;
@@ -14,8 +13,6 @@ import me.service.cron.service.TaskService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -34,7 +31,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    @ApiOperation("创建时间")
+    @ApiOperation("创建")
     public Result create(@RequestBody @Validated CreateTaskRequest request) {
         return taskService.create(request);
     }

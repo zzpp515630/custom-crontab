@@ -56,11 +56,6 @@ public class LogEntity {
     private String command;
 
     /**
-     * 参数
-     */
-    private String params;
-
-    /**
      * 是否开启任务超时
      */
     private Boolean timeout;
@@ -116,9 +111,14 @@ public class LogEntity {
     private String email;
 
     /**
-     * 邮件消息
+     * 邮件成功消息
      */
-    private String emailMessage;
+    private String emailSuccessMessage;
+
+    /**
+     * 邮件失败消息
+     */
+    private String emailErrorMessage;
 
     /**
      * 邮件结果

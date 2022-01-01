@@ -10,13 +10,11 @@ import me.service.cron.model.entity.LogEntity;
 import me.service.cron.model.query.LogQuery;
 import me.service.cron.model.response.LogResponse;
 import me.service.cron.service.LogService;
+import me.service.cron.util.BeanUtil;
 import me.service.cron.util.PageUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 描述：
@@ -33,7 +31,7 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, LogEntity> implements
     @Override
     public ListResult<LogResponse> list(LogQuery query) {
         Page<LogEntity> page = this.page(PageUtils.getPage(query), Wrappers.lambdaQuery(LogEntity.class)
-                .select(i->!"executeResult".equals(i.getProperty()))
+                .select(i -> !"executeResult".equals(i.getProperty()))
                 .ge(null != query.getStartTime(), LogEntity::getStartTime, query.getStartTime())
                 .le(null != query.getEndTime(), LogEntity::getStartTime, query.getEndTime())
                 .eq(null != query.getTaskId(), LogEntity::getTaskId, query.getTaskId())
@@ -41,13 +39,7 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, LogEntity> implements
         if (CollectionUtils.isEmpty(page.getRecords())) {
             return new ListResult<>(null, page.getTotal());
         }
-        List<LogResponse> responses = new ArrayList<>();
-        for (LogEntity entity : page.getRecords()) {
-            LogResponse response = new LogResponse();
-            BeanUtils.copyProperties(entity, response);
-            responses.add(response);
-        }
-        return new ListResult<>( responses, page.getTotal());
+        return new ListResult<>(BeanUtil.copyProperties(page.getRecords(), LogResponse.class), page.getTotal());
     }
 
     @Override

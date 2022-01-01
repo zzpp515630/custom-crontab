@@ -40,14 +40,14 @@ public class CreateTaskRequest {
     @ApiModelProperty("执行指令")
     private String command;
 
-    @ApiModelProperty("参数")
-    private String params;
-
     @ApiModelProperty("是否开启任务超时")
     private Boolean timeout;
 
     @ApiModelProperty("执行超时(s)")
     private Integer executeTimeout;
+
+    @ApiModelProperty("邮箱")
+    private String email;
 
     @ApiModelProperty("比较类型")
     private CompareType compareType;
@@ -58,12 +58,11 @@ public class CreateTaskRequest {
     @ApiModelProperty("预期值")
     private String expectedValue;
 
-    @ApiModelProperty("邮箱")
-    private String email;
+    @ApiModelProperty("邮件成功消息")
+    private String emailSuccessMessage;
 
-    @ApiModelProperty("邮件消息")
-    private String emailMessage;
-
+    @ApiModelProperty("邮件失败信息")
+    private String emailErrorMessage;
 
 
 }

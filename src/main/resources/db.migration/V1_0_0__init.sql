@@ -26,9 +26,6 @@ CREATE TABLE "task" (
   "timeout" integer(1) DEFAULT 0,
   "execute_timeout" integer(10) DEFAULT 0,
   "status" TEXT(32),
-  "compare_type" TEXT(32),
-  "compare_ignore_case" integer(10),
-  "expected_value" TEXT,
   "email" TEXT,
   "email_message" TEXT,
   PRIMARY KEY ("id")

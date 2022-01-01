@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +46,9 @@ public class CommonController {
     @ApiOperation("邮箱关键字")
     public GetResult<String> emailKeyword() {
         List<String> collect = Arrays.stream(LogEntity.class.getDeclaredFields())
-                .map(field -> "#"+field.getName()+"#").collect(Collectors.toList());
-        collect.add("#result#");
+                .map(field -> "{" + field.getName() + "}").collect(Collectors.toList());
+        collect.add("{resultCode}");
+        collect.add("{result}");
         return new GetResult<>(String.join(",", collect));
     }
 

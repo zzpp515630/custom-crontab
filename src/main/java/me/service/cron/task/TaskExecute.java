@@ -3,6 +3,7 @@ package me.service.cron.task;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import javafx.util.Pair;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -63,16 +63,16 @@ public class TaskExecute implements Runnable {
         //开始时间
         logEntity.setStartTime(System.currentTimeMillis());
         //执行
-        ExecuteResult running = compare(new ExecuteFactory(systemEntity).running(logEntity));
+        ExecuteResult running = compare(logEntity, new ExecuteFactory(systemEntity).running(logEntity));
         //结束时间
         logEntity.setEndTime(System.currentTimeMillis());
+        //发送邮件
+        sendEmail(running, logEntity);
         //封装执行结果
         logEntity.setExecuteResult(running.getResult());
         logEntity.setExecuteCode(running.getCode());
         //计算下一次的执行时间
         checkNextExecution();
-        //发送邮件
-        sendEmail(logEntity);
         //添加到db
         updateLog(logEntity);
     }
@@ -91,40 +91,55 @@ public class TaskExecute implements Runnable {
 
     }
 
-    private void sendEmail(LogEntity logEntity) {
+    private void sendEmail(ExecuteResult executeResult, LogEntity logEntity) {
         try {
-            if (CompareType.NON != logEntity.getCompareType()) {
-                if (-1 == logEntity.getExecuteCode()) {
-                    return;
-                }
-            }
-            String email = logEntity.getEmail();
-            if (StringUtils.isBlank(email)) {
+            if (null == systemEntity) {
                 return;
             }
-            String emailMessage = logEntity.getExecuteResult();
-            if (StringUtils.isNotBlank(logEntity.getEmailMessage())) {
-                emailMessage = logEntity.getEmailMessage();
+            if (StringUtils.isBlank(logEntity.getEmail())) {
+                return;
+            }
+            if (CompareType.NON == logEntity.getCompareType()) {
+                sendEmail(logEntity.getEmailSuccessMessage(), logEntity, executeResult);
+            } else {
+                if (-1 == logEntity.getExecuteCode()) {
+                    sendEmail(logEntity.getEmailErrorMessage(), logEntity, executeResult);
+                } else {
+                    sendEmail(logEntity.getEmailSuccessMessage(), logEntity, executeResult);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void sendEmail(String emailMessage, LogEntity logEntity, ExecuteResult executeResult) {
+        try {
+            if (null == systemEntity) {
+                return;
+            }
+            if (StringUtils.isBlank(emailMessage)) {
+                return;
+            }
+            String email = logEntity.getEmail();
+            Class<? extends LogEntity> aClass = logEntity.getClass();
+            Field[] allFields = getSuperClassFields(aClass.getDeclaredFields(), aClass);
+            for (Field declaredField : allFields) {
                 try {
-                    Class<? extends LogEntity> aClass = logEntity.getClass();
-                    Field[] allFields = getSuperClassFields(aClass.getDeclaredFields(), aClass);
-                    for (Field declaredField : allFields) {
-                        PropertyDescriptor pd = new PropertyDescriptor(declaredField.getName(), aClass);
-                        Method getMethod = pd.getReadMethod();
-                        Object fieldValue = ReflectionUtils.invokeMethod(getMethod, logEntity);
-                        if (fieldValue != null) {
-                            emailMessage = emailMessage.replace("#" + declaredField.getName() + "#", String.valueOf(fieldValue));
-                        }
+                    PropertyDescriptor pd = new PropertyDescriptor(declaredField.getName(), aClass);
+                    Method getMethod = pd.getReadMethod();
+                    Object fieldValue = ReflectionUtils.invokeMethod(getMethod, logEntity);
+                    if (fieldValue != null) {
+                        emailMessage = emailMessage.replace("{" + declaredField.getName() + "}", String.valueOf(fieldValue));
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
-                emailMessage = emailMessage.replace("#result#", logEntity.getExecuteResult());
             }
+            emailMessage = emailMessage.replace("{resultCode}", String.valueOf(executeResult.getCode()));
+            emailMessage = emailMessage.replace("{result}", executeResult.getResult());
             //发送邮件
-            if (null == systemEntity) {
-                return;
-            }
             String emailAccount = systemEntity.getEmailAccount();
             String emailFromAddress = systemEntity.getEmailFromAddress();
             String emailHost = systemEntity.getEmailHost();
@@ -132,7 +147,7 @@ public class TaskExecute implements Runnable {
             String emailPort = systemEntity.getEmailPort();
             EmailConfig emailConfig = new EmailConfig(emailAccount, emailPassword, emailFromAddress, emailHost, emailPort);
             EmailContent emailContent = new EmailContent();
-            emailContent.setToAddress(Collections.singletonList(email));
+            emailContent.setToAddress(Arrays.asList(email.split(",")));
             emailContent.setContext(emailMessage);
             emailContent.setContextType(MediaType.APPLICATION_JSON_VALUE);
             emailContent.setSubject(Optional.of(systemEntity.getSubject()).orElse("定时任务"));
@@ -145,26 +160,28 @@ public class TaskExecute implements Runnable {
         }
     }
 
-    private ExecuteResult compare(ExecuteResult running) {
-        CompareType compareType = entity.getCompareType();
+
+    private ExecuteResult compare(LogEntity logEntity, ExecuteResult running) {
+        CompareType compareType = logEntity.getCompareType();
         if (null == compareType) {
             return running;
         }
-        String expectedValue = entity.getExpectedValue();
+        String expectedValue = logEntity.getExpectedValue();
         String result = running.getResult();
-        if (BooleanUtils.isTrue(entity.getCompareIgnoreCase())) {
+        String compareValue = running.getResult();
+        if (BooleanUtils.isTrue(logEntity.getCompareIgnoreCase())) {
             expectedValue = expectedValue.toLowerCase();
-            result = result.toLowerCase();
+            compareValue = result.toLowerCase();
         }
         switch (compareType) {
             case EQUALS:
-                return ExecuteResult.check(result.equals(expectedValue), result);
+                return ExecuteResult.check(compareValue.equals(expectedValue), result);
             case CONTAIN:
-                return ExecuteResult.check(result.contains(expectedValue), result);
+                return ExecuteResult.check(compareValue.contains(expectedValue), result);
             case START_WITH:
-                return ExecuteResult.check(result.startsWith(expectedValue), result);
+                return ExecuteResult.check(compareValue.startsWith(expectedValue), result);
             case END_WITH:
-                return ExecuteResult.check(result.endsWith(expectedValue), result);
+                return ExecuteResult.check(compareValue.endsWith(expectedValue), result);
             case REGULAR:
                 return ExecuteResult.checkRegular(expectedValue, result);
             case NON:
@@ -172,7 +189,6 @@ public class TaskExecute implements Runnable {
                 return running;
         }
     }
-
 
     private void updateLog(LogEntity logEntity) {
         logEntity.setRunningTimer(logEntity.getEndTime() - logEntity.getStartTime());
@@ -268,11 +284,10 @@ public class TaskExecute implements Runnable {
         @Override
         public ExecuteResult running(LogEntity logEntity) {
             try {
-                String cmd = logEntity.getCommand();
-                String[] split = cmd.split("@");
-                String method = split[0].toUpperCase();
-                String url = split[1];
-                String params = logEntity.getParams();
+                HttpParam httpParam = analysis(logEntity.getCommand());
+                String method = httpParam.getMethod();
+                String url = httpParam.getUrl();
+                String params = httpParam.getParams();
                 String result;
                 if (HttpMethod.POST.name().equals(method)) {
                     result = ApacheHttpClient.httpPost(url, params);
@@ -288,6 +303,66 @@ public class TaskExecute implements Runnable {
                 log.error(e.getMessage(), e);
                 return new ExecuteResult(-1, e.getMessage());
             }
+        }
+
+        private static HttpParam analysis(String cmd) {
+            if (!cmd.startsWith("curl")) {
+                throw new TaskException("不是标准的http请求");
+            }
+            String[] split = cmd.split(" ");
+            if (split.length < 1) {
+                throw new TaskException("不是标准的http请求");
+            }
+            String curl = split[0];
+            if (!"curl".equals(curl)) {
+                throw new TaskException("不是标准的http请求");
+            }
+            List<String> strings = new ArrayList<>(Arrays.asList(split));
+            String url = strings.get(strings.size() - 1);
+            strings.remove(0);
+            strings.remove(strings.size() - 1);
+            Map<String, String> map = new HashMap<>(16);
+            int count = 0;
+            for (int i = 0; i < strings.size(); i++) {
+                if (count == 1) {
+                    map.put(strings.get(i - 1), strings.get(i));
+                    count = 0;
+                    continue;
+                }
+                count++;
+            }
+
+            return HttpParam.builder().build();
+        }
+
+        public static void main(String[] args) {
+            analysis("curl -F 'file=@head.png' https://mynamecoder.com/upload");
+        }
+
+        @Data
+        @Builder
+        private static class HttpParam {
+
+            /**
+             * 请求头
+             */
+            private Map<String, String> headers;
+
+            /**
+             * 请求地址
+             */
+            private String url;
+
+            /**
+             * 请求方式
+             */
+            private String method;
+
+            /**
+             * 请求参数
+             */
+            private String params;
+
         }
     }
 
@@ -330,6 +405,10 @@ public class TaskExecute implements Runnable {
         public static ExecuteResult checkRegular(String expectedValue, String result) {
             boolean isMatch = Pattern.matches(expectedValue, result);
             return check(isMatch, result);
+        }
+
+        public boolean isSuccess() {
+            return code == 1;
         }
     }
 }

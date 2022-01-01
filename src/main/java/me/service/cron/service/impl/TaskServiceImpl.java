@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.contents.CommonStatus;
-import me.service.cron.contents.CompareType;
 import me.service.cron.exception.TaskException;
 import me.service.cron.mapper.TaskMapper;
 import me.service.cron.model.GetResult;
@@ -26,7 +25,7 @@ import me.service.cron.util.CustomOptional;
 import me.service.cron.util.PageUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +49,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
     private final DynamicScheduleTask scheduleTask;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result create(CreateTaskRequest request) {
         scheduleTask.isValid(request.getCron());
         TaskEntity taskEntity = BeanUtil.copyProperties(request, TaskEntity.class);
@@ -57,9 +57,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         if (BooleanUtils.isFalse(request.getTimeout())) {
             request.setTimeout(Boolean.FALSE);
             request.setExecuteTimeout(0);
-        }
-        if (null == taskEntity.getCompareType()) {
-            taskEntity.setCompareType(CompareType.NON);
         }
         boolean save = this.save(taskEntity);
         if (!save) {
@@ -70,6 +67,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result modify(ModifyTaskRequest request) {
         TaskEntity taskQuery = this.getById(request.getId());
         if (null == taskQuery) {
@@ -95,16 +93,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
                 .like(StringUtils.isNotBlank(query.getName()), TaskEntity::getName, query.getName())
                 .eq(null != query.getTaskType(), TaskEntity::getTaskType, query.getTaskType())
         );
-        if (CollectionUtils.isEmpty(page.getRecords())) {
-            return new ListResult<>(null, page.getTotal());
-        }
-        List<TaskResponse> responses = new ArrayList<>();
-        for (TaskEntity entity : page.getRecords()) {
-
-            TaskResponse response = BeanUtil.copyProperties(entity, TaskResponse.class);
-            responses.add(response);
-        }
-        return new ListResult<>(responses, page.getTotal());
+        return new ListResult<>(BeanUtil.copyProperties(page.getRecords(), TaskResponse.class), page.getTotal());
     }
 
     @Override

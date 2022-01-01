@@ -3,7 +3,6 @@ package me.service.cron.util;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +20,18 @@ public class CronUtils {
      * @param cronExpression Cron表达式
      * @return boolean 表达式是否有效
      */
-    public static boolean isValid(String cronExpression) {
-        return CronExpression.isValidExpression(cronExpression);
+//    public static boolean isValid(String cronExpression) {
+//        return CronExpression.isValidExpression(cronExpression);
+//    }
+
+    public static boolean isValid(String expression){
+        if (expression == null) {
+            return false;
+        }
+            CronExpression.parse(expression);
+            return true;
     }
+
 
     /**
      * 返回一个字符串值,表示该消息无效Cron表达式给出有效性

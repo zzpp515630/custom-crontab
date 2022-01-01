@@ -22,12 +22,6 @@
  */
 package me.service.cron.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.annotation.Native;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /** Provide simplified platform information. */
 public final class Platform {
     public static final int UNSPECIFIED = -1;

@@ -1,12 +1,15 @@
 package me.service.cron.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import me.service.cron.contents.CompareType;
 import me.service.cron.contents.CommonStatus;
+import me.service.cron.contents.CompareType;
 import me.service.cron.contents.TaskType;
+
+import java.util.List;
 
 /**
  * 描述：
@@ -49,11 +52,6 @@ public class TaskEntity {
     private String command;
 
     /**
-     * 参数
-     */
-    private String params;
-
-    /**
      * 是否开启任务超时
      */
     private Boolean timeout;
@@ -69,6 +67,21 @@ public class TaskEntity {
     private CommonStatus status;
 
     /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 邮件成功消息
+     */
+    private String emailSuccessMessage;
+
+    /**
+     * 邮件失败消息
+     */
+    private String emailErrorMessage;
+
+    /**
      * 比较类型
      */
     private CompareType compareType;
@@ -82,15 +95,5 @@ public class TaskEntity {
      * 预期值
      */
     private String expectedValue;
-
-    /**
-     * 邮箱
-     */
-    private String email;
-
-    /**
-     * 邮件消息
-     */
-    private String emailMessage;
 
 }
