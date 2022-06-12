@@ -374,7 +374,7 @@ public class TaskExecute implements Runnable {
      */
     private static Field[] getSuperClassFields(Field[] declaredFields, Class<?> clazz) {
         Class<?> superClazz = clazz.getSuperclass();
-        if (superClazz.equals(ApplicationEvent.class)) {
+        if (superClazz.equals(Object.class)) {
             return declaredFields;
         }
         Field[] superClassFields = superClazz.getDeclaredFields();
