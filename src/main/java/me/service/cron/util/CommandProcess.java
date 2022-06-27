@@ -102,11 +102,12 @@ public class CommandProcess {
 
     private synchronized List<String> streamExport(Process process) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        List<String> result = Collections.synchronizedList(new ArrayList<String>());
+        List<String> result = Collections.synchronizedList(new ArrayList<>());
         executorService.execute(() -> {
             try (BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.forName(charsets)))) {
                 String line;
                 while ((line = read.readLine()) != null) {
+                    System.out.println("command execute:"+line);
                     result.add(line);
                 }
             } catch (Exception ignore) {
@@ -116,6 +117,7 @@ public class CommandProcess {
             try (BufferedReader readError = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charset.forName(charsets)));) {
                 String lineError;
                 while ((lineError = readError.readLine()) != null) {
+                    System.err.println("command execute:"+lineError);
                     result.add(lineError);
                 }
             } catch (Exception ignore) {

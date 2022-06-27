@@ -55,9 +55,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         TaskEntity taskEntity = BeanUtil.copyProperties(request, TaskEntity.class);
         taskEntity.setStatus(CommonStatus.Start);
         if (BooleanUtils.isFalse(request.getTimeout())) {
-            request.setTimeout(Boolean.FALSE);
-            request.setExecuteTimeout(0);
+            taskEntity.setTimeout(Boolean.FALSE);
+            taskEntity.setExecuteTimeout(0);
         }
+        taskEntity.setCompareIgnoreCase(BooleanUtils.isTrue(request.getCompareIgnoreCase()));
         boolean save = this.save(taskEntity);
         if (!save) {
             throw new TaskException("创建定时任务失败");
@@ -76,9 +77,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         CustomOptional.of(request.getCron()).isPresentValue(scheduleTask::isValid);
         TaskEntity taskEntity = BeanUtil.copyProperties(request, TaskEntity.class);
         if (BooleanUtils.isFalse(request.getTimeout())) {
-            request.setTimeout(Boolean.FALSE);
-            request.setExecuteTimeout(0);
+            taskEntity.setTimeout(Boolean.FALSE);
+            taskEntity.setExecuteTimeout(0);
         }
+        taskEntity.setCompareIgnoreCase(BooleanUtils.isTrue(request.getCompareIgnoreCase()));
         boolean save = this.updateById(taskEntity);
         if (!save) {
             throw new TaskException("修改定时任务失败");

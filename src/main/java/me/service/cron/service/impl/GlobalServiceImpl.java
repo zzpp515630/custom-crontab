@@ -45,7 +45,7 @@ public class GlobalServiceImpl implements GlobalService {
         LocalDate lastDate = localDate.plusDays(-1 * logRetainDays);
         long toEpochMilli = lastDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         boolean remove = logService.remove(Wrappers.lambdaQuery(LogEntity.class)
-                .eq(LogEntity::getStartTime, toEpochMilli));
+                .le(LogEntity::getStartTime, toEpochMilli));
         log.info("clean logs retain days:{},remove:{}", logRetainDays, remove);
         new CommandProcess(systemEntity.getCommandPrefix().split(" ")).execute("echo > /var/log/crontab.log");
     }

@@ -102,7 +102,7 @@ public class TaskExecute implements Runnable {
             if (CompareType.NON == logEntity.getCompareType()) {
                 sendEmail(logEntity.getEmailSuccessMessage(), logEntity, executeResult);
             } else {
-                if (-1 == logEntity.getExecuteCode()) {
+                if (-1 == executeResult.getCode()) {
                     sendEmail(logEntity.getEmailErrorMessage(), logEntity, executeResult);
                 } else {
                     sendEmail(logEntity.getEmailSuccessMessage(), logEntity, executeResult);
