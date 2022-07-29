@@ -12,11 +12,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  * @author zhang peng
  */
+@Profile("prod")
 @Configuration
 public class MvcConfiguration implements WebMvcConfigurer {
 
     @Override
-    @Profile("prod")
     public void addInterceptors(InterceptorRegistry registry) {
         InterceptorRegistration interceptor = registry.addInterceptor(new AuthHandler());
         /**

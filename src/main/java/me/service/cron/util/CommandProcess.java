@@ -89,6 +89,14 @@ public class CommandProcess {
         return new Pair<>(execute.getKey(), String.join(delimiter, execute.getValue()));
     }
 
+    public Pair<Integer,  List<String>> executeArray(String command) {
+        return executeArray(null, command);
+    }
+
+    public Pair<Integer,  List<String>> executeArray(String[] env, String command) {
+       return execute(env, command);
+    }
+
     private String[] analysisCommand(String cmd) {
         List<String> command = commandPrefix != null && commandPrefix.length > 0 ?
                 new ArrayList<>(Arrays.asList(commandPrefix)) : new ArrayList<>();

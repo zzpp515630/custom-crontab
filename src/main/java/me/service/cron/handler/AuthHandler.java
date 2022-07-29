@@ -1,7 +1,9 @@
 package me.service.cron.handler;
 
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.util.ApacheHttpClient;
+import me.service.cron.util.CommandProcess;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -11,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,11 +53,31 @@ public class AuthHandler implements HandlerInterceptor {
         if (StringUtils.isBlank(nasSid)) {
             return false;
         }
-        byte[] bytes = ApacheHttpClient.httpGetByByteBuffer("http://localhost:8080/cgi-bin/authLogin.cgi?sid=" + nasSid);
+
+        byte[] bytes = ApacheHttpClient.httpGetByByteBuffer("http://localhost:"+port("8080")+"/cgi-bin/authLogin.cgi?sid=" + nasSid);
         String result = new String(bytes, StandardCharsets.UTF_8);
         if (!result.contains("cuid")) {
             return false;
         }
         return true;
+    }
+
+    private String port(String defaultPort){
+      try{
+          CommandProcess commandProcess = new CommandProcess();
+          Pair<Integer, List<String>> execute = commandProcess.executeArray("netstat -nlpt |grep apache_proxy |awk  '{print $4,$7}'");
+          List<String> value = execute.getValue();
+          for (String s : value) {
+              if(s.contains("apache_proxys")){
+                  continue;
+              }
+              if(!s.contains("apache_proxy")){
+                  continue;
+              }
+              return s.split(" ")[0].replace(":::","").trim();
+          }
+      }catch (Exception e){
+      }
+        return defaultPort;
     }
 }
