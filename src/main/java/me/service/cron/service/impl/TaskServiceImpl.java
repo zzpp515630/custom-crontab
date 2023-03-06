@@ -133,6 +133,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
             status = CommonStatus.Start;
         }
         this.lambdaUpdate().set(TaskEntity::getStatus, status).eq(TaskEntity::getId, taskId).update();
+        execute(this.getById(taskId));
         return Result.success();
     }
 

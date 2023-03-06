@@ -1,6 +1,7 @@
 package me.service.cron.model.query;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,4 +17,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @ApiModel("应用查询")
 public class ApplyQuery extends PageQuery{
+
+    @ApiModelProperty("应用名称")
+    private String name;
+
 }

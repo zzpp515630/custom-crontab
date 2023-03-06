@@ -4,13 +4,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.mapper.SystemMapper;
+import me.service.cron.model.entity.ApplyEntity;
 import me.service.cron.model.entity.SystemEntity;
 import me.service.cron.schema.SchemaComponent;
+import me.service.cron.service.ApplyService;
 import me.service.cron.task.DynamicScheduleTask;
 import me.service.cron.util.CommandProcess;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 描述：
@@ -32,9 +36,29 @@ public class InitializeRunner implements ApplicationRunner {
 
     private final DynamicScheduleTask dynamicScheduleTask;
 
+    private final ApplyService applyService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        initClass();
+        initTask();
+    }
+
+    private void initClass() {
+        try {
+            List<ApplyEntity> list = applyService.list(Wrappers.emptyWrapper());
+            for (ApplyEntity entity : list) {
+                String code = applyService.loadCode(entity);
+                applyService.load(code,entity);
+
+            }
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void initTask() {
         CommandProcess commandProcess = new CommandProcess();
         String commandPrefix = String.join(" ", commandProcess.getCommandPrefix());
         schemaComponent.execute();

@@ -32,32 +32,12 @@ public class ApplyEntity {
     private String description;
 
     /**
-     * 应用类型
+     * 是否引用
      */
-    private ApplyType applyType;
+    private Boolean quote;
 
     /**
-     * 开始命令
+     * 程序名
      */
-    private String startCommand;
-
-    /**
-     * 结束命令
-     */
-    private String stopCommand;
-
-    /**
-     * 强制结束命令
-     */
-    private String forceStopCommand;
-
-    /**
-     * 状态判断命令
-     */
-    private String statusCommand;
-
-    /**
-     * 状态比较命令
-     */
-    private String compareCommand;
+    private String javaName;
 }

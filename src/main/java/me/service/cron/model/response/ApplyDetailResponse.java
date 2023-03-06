@@ -1,25 +1,19 @@
-package me.service.cron.model.request;
+package me.service.cron.model.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * 描述：
- * 2021/12/21 16:34.
- *
- * @author zhangpeng2
- * @version 1.0
- * @since 1.0
+ * @author zhangpeng
+ * @create 2023/3/3 23:53
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel("修改应用")
-public class ModifyApplyRequest extends CreateApplyRequest {
+@ApiModel("应用响应")
+public class ApplyDetailResponse {
 
     @NotNull(message = "主键id不能为空")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -32,7 +26,7 @@ public class ModifyApplyRequest extends CreateApplyRequest {
     @ApiModelProperty("描述")
     private String description;
 
-    @ApiModelProperty("代码")
+    @ApiModelProperty("源码")
     private String code;
 
 }

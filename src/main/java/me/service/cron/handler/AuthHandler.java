@@ -1,6 +1,6 @@
 package me.service.cron.handler;
 
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.util.ApacheHttpClient;
 import me.service.cron.util.CommandProcess;

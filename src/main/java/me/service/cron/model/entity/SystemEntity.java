@@ -63,4 +63,9 @@ public class SystemEntity {
      */
     private String emailPort;
 
+    /**
+     * 代码路径
+     */
+    private String codePath;
+
 }

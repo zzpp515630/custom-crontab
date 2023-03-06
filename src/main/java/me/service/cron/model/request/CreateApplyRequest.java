@@ -23,22 +23,7 @@ public class CreateApplyRequest {
     @ApiModelProperty("描述")
     private String description;
 
-    @ApiModelProperty("应用类型")
-    private ApplyType applyType;
-
-    @ApiModelProperty("开始命令")
-    private String startCommand;
-
-    @ApiModelProperty("结束命令")
-    private String stopCommand;
-
-    @ApiModelProperty("强制结束命令")
-    private String forceStopCommand;
-
-    @ApiModelProperty("状态判断命令")
-    private String statusCommand;
-
-    @ApiModelProperty("状态判断比较命令")
-    private String compareCommand;
+    @ApiModelProperty("代码")
+    private String code;
 
 }

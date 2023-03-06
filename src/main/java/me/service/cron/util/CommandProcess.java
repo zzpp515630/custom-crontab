@@ -1,7 +1,7 @@
 package me.service.cron.util;
 
 
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -62,7 +62,7 @@ public class CommandProcess {
             List<String> result = streamExport(process);
             int i = process.waitFor();
             log.info("execute completed command:{}", command);
-            return new Pair<>(i, result);
+            return Pair.of(i, result);
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);
@@ -72,7 +72,7 @@ public class CommandProcess {
             }
         }
         log.info("execute fail command:{}", command);
-        return new Pair<>(-1, new ArrayList<>());
+        return Pair.of(-1, new ArrayList<>());
     }
 
     public Pair<Integer, String> execute(String command) {
@@ -86,7 +86,7 @@ public class CommandProcess {
 
     public Pair<Integer, String> execute(String[] env, String delimiter, String command) {
         Pair<Integer, List<String>> execute = execute(env, command);
-        return new Pair<>(execute.getKey(), String.join(delimiter, execute.getValue()));
+        return Pair.of(execute.getKey(), String.join(delimiter, execute.getValue()));
     }
 
     public Pair<Integer,  List<String>> executeArray(String command) {

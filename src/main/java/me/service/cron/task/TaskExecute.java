@@ -1,7 +1,7 @@
 package me.service.cron.task;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import javafx.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,13 +17,15 @@ import me.service.cron.exception.TaskException;
 import me.service.cron.mapper.LogMapper;
 import me.service.cron.mapper.SystemMapper;
 import me.service.cron.mapper.TaskMapper;
+import me.service.cron.model.ApplyClass;
 import me.service.cron.model.entity.LogEntity;
 import me.service.cron.model.entity.SystemEntity;
 import me.service.cron.model.entity.TaskEntity;
+import me.service.cron.service.impl.ApplyServiceImpl;
 import me.service.cron.util.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.ApplicationEvent;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.ReflectionUtils;
@@ -215,8 +217,10 @@ public class TaskExecute implements Runnable {
 
         private Execute get(TaskType taskType) {
             switch (taskType) {
-                case Http:
-                    return new HttpExecute();
+//                case Http:
+//                    return new HttpExecute();
+                case JAVA:
+                    return new JavaExecute(systemEntity);
                 case Shell:
                     return new ShellExecute(systemEntity);
                 default:
@@ -255,6 +259,33 @@ public class TaskExecute implements Runnable {
          */
         ExecuteResult running(LogEntity logEntity);
 
+    }
+
+    static class JavaExecute implements Execute {
+
+        private final SystemEntity systemEntity;
+
+        public JavaExecute(SystemEntity systemEntity) {
+            this.systemEntity = systemEntity;
+        }
+
+        @Override
+        public ExecuteResult running(LogEntity logEntity) {
+            try {
+                String command = logEntity.getCommand();
+                ApplyClass applyClass = ApplyServiceImpl.CODE_LOA_MAP.get(Long.parseLong(command));
+                if (null == applyClass) {
+                    return new ExecuteResult(-1, "执行资源不存在！！");
+                }
+                Class<?> aClass = applyClass.getAClass();
+                Pair<Integer, String> job = (Pair<Integer, String>) ApplyServiceImpl.dynamicClassHandler.invoke(aClass, "job");
+                System.out.println("java running:"+JSONObject.toJSONString(job));
+                return new ExecuteResult(job.getKey() == 0 ? 1 : -1, job.getValue());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return new ExecuteResult(-1, e.getMessage());
+            }
+        }
     }
 
     static class ShellExecute implements Execute {

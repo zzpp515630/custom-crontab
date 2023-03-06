@@ -1,10 +1,12 @@
 package me.service.cron.model.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import me.service.cron.contents.ApplyType;
 import me.service.cron.contents.CommonStatus;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * 描述：
@@ -18,37 +20,21 @@ import me.service.cron.contents.CommonStatus;
 @ApiModel("应用响应")
 public class ApplyResponse {
 
+    @NotNull(message = "主键id不能为空")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @ApiModelProperty("主键id")
+    private Long id;
+
     @ApiModelProperty("应用名称")
     private String name;
 
     @ApiModelProperty("描述")
     private String description;
 
-    @ApiModelProperty("应用类型")
-    private ApplyType applyType;
+    @ApiModelProperty("是否装载")
+    private Boolean load;
 
-    @ApiModelProperty("开始命令")
-    private String startCommand;
-
-    @ApiModelProperty("结束命令")
-    private String stopCommand;
-
-    @ApiModelProperty("强制结束命令")
-    private String forceStopCommand;
-
-    @ApiModelProperty("状态判断命令")
-    private String statusCommand;
-
-    @ApiModelProperty("状态判断比较命令")
-    private String compareCommand;
-
-    @ApiModelProperty("执行开始时间")
-    private Long createTime;
-
-    @ApiModelProperty("执行结束时间")
-    private Long updateTime;
-
-    @ApiModelProperty("状态判断")
-    private CommonStatus status;
+    @ApiModelProperty("是否引用")
+    private Boolean quote;
 
 }
