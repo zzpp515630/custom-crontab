@@ -17,6 +17,7 @@ import me.service.cron.model.query.TaskQuery;
 import me.service.cron.model.request.CreateTaskRequest;
 import me.service.cron.model.request.ModifyTaskRequest;
 import me.service.cron.model.response.TaskResponse;
+import me.service.cron.service.ApplyService;
 import me.service.cron.service.TaskService;
 import me.service.cron.task.DynamicScheduleTask;
 import me.service.cron.util.BeanUtil;
@@ -48,6 +49,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
 
     private final DynamicScheduleTask scheduleTask;
 
+    private final ApplyService applyService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result create(CreateTaskRequest request) {
@@ -63,6 +66,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         if (!save) {
             throw new TaskException("创建定时任务失败");
         }
+        applyService.quote(Boolean.TRUE,request.getTaskType(),request.getCommand());
         execute(taskEntity);
         return Result.success();
     }
@@ -85,6 +89,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         if (!save) {
             throw new TaskException("修改定时任务失败");
         }
+        applyService.quote(Boolean.FALSE,request.getTaskType(),taskQuery.getCommand());
+        applyService.quote(Boolean.TRUE,request.getTaskType(),request.getCommand());
         execute(this.getById(request.getId()));
         return Result.success();
     }
@@ -107,6 +113,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         taskQuery.setStatus(CommonStatus.Stop);
         execute(taskQuery);
         this.removeById(taskId);
+        applyService.quote(Boolean.FALSE,taskQuery.getTaskType(),taskQuery.getCommand());
         return Result.success();
     }
 

@@ -1,6 +1,7 @@
 package me.service.cron.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import me.service.cron.contents.TaskType;
 import me.service.cron.model.GetResult;
 import me.service.cron.model.ListResult;
 import me.service.cron.model.Result;
@@ -81,4 +82,6 @@ public interface ApplyService extends IService<ApplyEntity> {
 
 
     Result load(String code, ApplyEntity entity) throws Exception;
+
+    void quote(Boolean aTrue, TaskType taskType, String applyId);
 }

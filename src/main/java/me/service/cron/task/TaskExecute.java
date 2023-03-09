@@ -219,7 +219,7 @@ public class TaskExecute implements Runnable {
             switch (taskType) {
 //                case Http:
 //                    return new HttpExecute();
-                case JAVA:
+                case Java:
                     return new JavaExecute(systemEntity);
                 case Shell:
                     return new ShellExecute(systemEntity);

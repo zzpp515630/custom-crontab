@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.service.cron.contents.TaskType;
 import me.service.cron.mapper.ApplyMapper;
 import me.service.cron.model.ApplyClass;
 import me.service.cron.model.GetResult;
@@ -27,6 +27,7 @@ import me.zzpp.dynamic.core.handler.DynamicClassHandler;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 /**
  * 描述：
  * 2021/12/21 16:32.
+ * s
  *
  * @author zhangpeng2
  * @version 1.0
@@ -65,7 +67,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     @Override
     public Result create(CreateApplyRequest request) throws Exception {
-        Integer count = this.lambdaQuery().eq(ApplyEntity::getName, request.getName()).count();
+        Long count = this.lambdaQuery().eq(ApplyEntity::getName, request.getName()).count();
         if (count > 0) {
             return Result.error("资源已存在");
         }
@@ -85,17 +87,13 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
         if (null == query) {
             return Result.error("资源不存在");
         }
-        Integer count = this.lambdaQuery()
+        Long count = this.lambdaQuery()
                 .ne(ApplyEntity::getId, request.getId())
                 .eq(ApplyEntity::getName, request.getName())
                 .count();
         if (count > 0) {
             return Result.error("资源已存在");
         }
-        ApplyClass applyClass = CODE_LOA_MAP.get(request.getId());
-//        if (null != applyClass && applyClass.getLoad()) {
-//            return Result.error("请先卸载文件");
-//        }
         String code = request.getCode();
         ApplyEntity entity = new ApplyEntity();
         entity.setId(query.getId());
@@ -140,11 +138,10 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
                 response.setId(x.getId());
                 response.setName(x.getName());
                 response.setDescription(x.getDescription());
-                response.setQuote(Boolean.FALSE);
+                response.setQuote(x.getQuote());
                 response.setLoad(Boolean.FALSE);
                 ApplyClass applyClass = CODE_LOA_MAP.get(x.getId());
                 if (null != applyClass) {
-                    response.setQuote(applyClass.getQuote());
                     response.setLoad(applyClass.getLoad());
                 }
                 return response;
@@ -158,10 +155,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
     public Result running(Long applyId) {
         ApplyClass applyClass = CODE_LOA_MAP.get(applyId);
         Class<?> aClass = applyClass.getAClass();
-//        executorService.submit(() -> {
-//            dynamicClassHandler.invoke(aClass, "job");
-//        });
-        Pair<Integer,String> job = (Pair<Integer, String>) dynamicClassHandler.invoke(aClass, "job");
+        Pair<Integer, String> job = (Pair<Integer, String>) dynamicClassHandler.invoke(aClass, "job");
         return new GetResult<>(job);
     }
 
@@ -224,15 +218,40 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     @Override
     public Result load(String code, ApplyEntity entity) throws Exception {
+        SystemResponse system = systemService.get().getData();
+        String codePath = system.getCodePath();
+        List<String> libJarPath = new ArrayList<>();
+        File[] files = new File(codePath, "lib").listFiles();
+        if (null != files) {
+            for (File file : files) {
+                if (file.getName().endsWith(".jar")) {
+                    System.out.println(file.getAbsolutePath());
+                    libJarPath.add(file.getAbsolutePath());
+                }
+            }
+        }
+        ApplicationHome h = new ApplicationHome(ApplyServiceImpl.class);
+        File source = h.getSource();
+        if (source.getName().equals(".jar")) {
+            libJarPath.add(h.getSource().getAbsolutePath());
+        }
         String javaName = entity.getJavaName();
-
-        Class<?> aClass = dynamicClassHandler.loadClass(code);
+        Class<?> aClass = dynamicClassHandler.loadClass(javaName, libJarPath, code);
         ApplyClass applyClass = new ApplyClass();
         applyClass.setAClass(aClass);
-        applyClass.setQuote(entity.getQuote());
         applyClass.setJavaName(javaName);
         applyClass.setLoad(Boolean.TRUE);
         CODE_LOA_MAP.put(entity.getId(), applyClass);
         return Result.success();
+    }
+
+    @Override
+    public void quote(Boolean quote, TaskType taskType, String applyId) {
+        if (TaskType.Java != taskType) {
+            return;
+        }
+        this.lambdaUpdate()
+                .set(ApplyEntity::getQuote, quote)
+                .eq(ApplyEntity::getId, Long.parseLong(applyId));
     }
 }

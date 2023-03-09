@@ -18,7 +18,7 @@ public enum TaskType {
     /**
      * http
      */
-    JAVA,
+    Java,
 
     ;
 

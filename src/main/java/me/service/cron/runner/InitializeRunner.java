@@ -10,10 +10,12 @@ import me.service.cron.schema.SchemaComponent;
 import me.service.cron.service.ApplyService;
 import me.service.cron.task.DynamicScheduleTask;
 import me.service.cron.util.CommandProcess;
+import me.service.cron.util.DynamicLoadUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -40,8 +42,25 @@ public class InitializeRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        initClass();
+        //创建sql表格
+        //数据库版本控制
+        schemaComponent.execute();
+        //初始化任务
         initTask();
+        //装载lib
+        initLib();
+        //初始化class
+        initClass();
+    }
+
+    private void initLib() {
+        SystemEntity systemEntity = systemMapper.selectOne(Wrappers.lambdaQuery(SystemEntity.class));
+        if(systemEntity == null || systemEntity.getCodePath() == null){
+            return;
+        }
+        String codePath = systemEntity.getCodePath();
+        File jarPath = new File(codePath, "lib");
+        DynamicLoadUtils.loadPath(jarPath);
     }
 
     private void initClass() {
@@ -61,7 +80,6 @@ public class InitializeRunner implements ApplicationRunner {
     private void initTask() {
         CommandProcess commandProcess = new CommandProcess();
         String commandPrefix = String.join(" ", commandProcess.getCommandPrefix());
-        schemaComponent.execute();
         SystemEntity systemEntity = systemMapper.selectOne(Wrappers.lambdaQuery(SystemEntity.class));
         if (null == systemEntity) {
             systemEntity = new SystemEntity();

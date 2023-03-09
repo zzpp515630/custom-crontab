@@ -21,11 +21,6 @@ public class ApplyClass {
     private Boolean load;
 
     /**
-     * 是否引用
-     */
-    private Boolean quote;
-
-    /**
      * 装载代码
      */
     private Class<?> aClass;
