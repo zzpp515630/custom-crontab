@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.contents.CommonStatus;
-import me.service.cron.contents.TaskType;
 import me.service.cron.exception.TaskException;
 import me.service.cron.mapper.TaskMapper;
 import me.service.cron.model.GetResult;
@@ -18,7 +17,7 @@ import me.service.cron.model.query.TaskQuery;
 import me.service.cron.model.request.CreateTaskRequest;
 import me.service.cron.model.request.ModifyTaskRequest;
 import me.service.cron.model.response.TaskResponse;
-import me.service.cron.service.ApplyService;
+import me.service.cron.service.AppService;
 import me.service.cron.service.TaskService;
 import me.service.cron.task.DynamicScheduleTask;
 import me.service.cron.util.BeanUtil;
@@ -50,7 +49,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
 
     private final DynamicScheduleTask scheduleTask;
 
-    private final ApplyService applyService;
+    private final AppService applyService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

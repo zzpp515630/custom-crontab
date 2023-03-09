@@ -21,7 +21,7 @@ import me.service.cron.model.ApplyClass;
 import me.service.cron.model.entity.LogEntity;
 import me.service.cron.model.entity.SystemEntity;
 import me.service.cron.model.entity.TaskEntity;
-import me.service.cron.service.impl.ApplyServiceImpl;
+import me.service.cron.service.impl.AppServiceImpl;
 import me.service.cron.util.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -273,12 +273,12 @@ public class TaskExecute implements Runnable {
         public ExecuteResult running(LogEntity logEntity) {
             try {
                 String command = logEntity.getCommand();
-                ApplyClass applyClass = ApplyServiceImpl.CODE_LOA_MAP.get(Long.parseLong(command));
+                ApplyClass applyClass = AppServiceImpl.CODE_LOA_MAP.get(Long.parseLong(command));
                 if (null == applyClass) {
                     return new ExecuteResult(-1, "执行资源不存在！！");
                 }
                 Class<?> aClass = applyClass.getAClass();
-                Pair<Integer, String> job = (Pair<Integer, String>) ApplyServiceImpl.dynamicClassHandler.invoke(aClass, "job");
+                Pair<Integer, String> job = (Pair<Integer, String>) AppServiceImpl.dynamicClassHandler.invoke(aClass, "job");
                 System.out.println("java running:"+JSONObject.toJSONString(job));
                 return new ExecuteResult(job.getKey() == 0 ? 1 : -1, job.getValue());
             } catch (Exception e) {

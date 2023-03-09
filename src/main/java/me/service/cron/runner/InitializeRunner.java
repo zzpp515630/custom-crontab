@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.mapper.SystemMapper;
-import me.service.cron.model.entity.ApplyEntity;
+import me.service.cron.model.entity.AppEntity;
 import me.service.cron.model.entity.SystemEntity;
 import me.service.cron.schema.SchemaComponent;
-import me.service.cron.service.ApplyService;
+import me.service.cron.service.AppService;
 import me.service.cron.task.DynamicScheduleTask;
 import me.service.cron.util.CommandProcess;
 import me.service.cron.util.DynamicLoadUtils;
@@ -38,7 +38,7 @@ public class InitializeRunner implements ApplicationRunner {
 
     private final DynamicScheduleTask dynamicScheduleTask;
 
-    private final ApplyService applyService;
+    private final AppService applyService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -65,8 +65,8 @@ public class InitializeRunner implements ApplicationRunner {
 
     private void initClass() {
         try {
-            List<ApplyEntity> list = applyService.list(Wrappers.emptyWrapper());
-            for (ApplyEntity entity : list) {
+            List<AppEntity> list = applyService.list(Wrappers.emptyWrapper());
+            for (AppEntity entity : list) {
                 String code = applyService.loadCode(entity);
                 applyService.load(code,entity);
 

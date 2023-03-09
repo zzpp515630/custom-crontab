@@ -5,7 +5,7 @@ import me.service.cron.contents.TaskType;
 import me.service.cron.model.GetResult;
 import me.service.cron.model.ListResult;
 import me.service.cron.model.Result;
-import me.service.cron.model.entity.ApplyEntity;
+import me.service.cron.model.entity.AppEntity;
 import me.service.cron.model.query.ApplyQuery;
 import me.service.cron.model.request.CreateApplyRequest;
 import me.service.cron.model.request.ModifyApplyRequest;
@@ -20,7 +20,7 @@ import me.service.cron.model.response.ApplyResponse;
  * @version 1.0
  * @since 1.0
  */
-public interface ApplyService extends IService<ApplyEntity> {
+public interface AppService extends IService<AppEntity> {
     /**
      * 创建
      *
@@ -78,10 +78,10 @@ public interface ApplyService extends IService<ApplyEntity> {
      */
     Result unload(Long applyId);
 
-    String loadCode(ApplyEntity entity) throws Exception;
+    String loadCode(AppEntity entity) throws Exception;
 
 
-    Result load(String code, ApplyEntity entity) throws Exception;
+    Result load(String code, AppEntity entity) throws Exception;
 
     void quote(Boolean aTrue, TaskType taskType, String applyId);
 }

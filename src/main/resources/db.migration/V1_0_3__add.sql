@@ -1,4 +1,4 @@
-CREATE TABLE "apply" (
+CREATE TABLE "app" (
                          "id" INTEGER NOT NULL,
                          "name" TEXT(64) NOT NULL,
                          "description" TEXT(512),

@@ -7,19 +7,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.contents.TaskType;
-import me.service.cron.mapper.ApplyMapper;
+import me.service.cron.mapper.AppMapper;
 import me.service.cron.model.ApplyClass;
 import me.service.cron.model.GetResult;
 import me.service.cron.model.ListResult;
 import me.service.cron.model.Result;
-import me.service.cron.model.entity.ApplyEntity;
+import me.service.cron.model.entity.AppEntity;
 import me.service.cron.model.query.ApplyQuery;
 import me.service.cron.model.request.CreateApplyRequest;
 import me.service.cron.model.request.ModifyApplyRequest;
 import me.service.cron.model.response.ApplyDetailResponse;
 import me.service.cron.model.response.ApplyResponse;
 import me.service.cron.model.response.SystemResponse;
-import me.service.cron.service.ApplyService;
+import me.service.cron.service.AppService;
 import me.service.cron.service.SystemService;
 import me.service.cron.util.PageUtils;
 import me.zzpp.dynamic.core.handler.DefaultDynamicClassHandlerImpl;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> implements ApplyService {
+public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements AppService {
 
     private final SystemService systemService;
 
@@ -65,12 +65,12 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result create(CreateApplyRequest request) throws Exception {
-        Long count = this.lambdaQuery().eq(ApplyEntity::getName, request.getName()).count();
+        Long count = this.lambdaQuery().eq(AppEntity::getName, request.getName()).count();
         if (count > 0) {
             return Result.error("资源已存在");
         }
         String code = request.getCode();
-        ApplyEntity entity = new ApplyEntity();
+        AppEntity entity = new AppEntity();
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
         entity.setJavaName(dynamicClassHandler.getClassName(code));
@@ -81,19 +81,19 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     @Override
     public Result modify(ModifyApplyRequest request) throws Exception {
-        ApplyEntity query = this.getById(request.getId());
+        AppEntity query = this.getById(request.getId());
         if (null == query) {
             return Result.error("资源不存在");
         }
         Long count = this.lambdaQuery()
-                .ne(ApplyEntity::getId, request.getId())
-                .eq(ApplyEntity::getName, request.getName())
+                .ne(AppEntity::getId, request.getId())
+                .eq(AppEntity::getName, request.getName())
                 .count();
         if (count > 0) {
             return Result.error("资源已存在");
         }
         String code = request.getCode();
-        ApplyEntity entity = new ApplyEntity();
+        AppEntity entity = new AppEntity();
         entity.setId(query.getId());
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
@@ -105,7 +105,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     @Override
     public Result remove(Long applyId) {
-        ApplyEntity query = this.getById(applyId);
+        AppEntity query = this.getById(applyId);
         if (null == query) {
             return Result.error("资源不存在");
         }
@@ -116,7 +116,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     @Override
     public GetResult<ApplyDetailResponse> get(Long applyId) throws Exception {
-        ApplyEntity query = this.getById(applyId);
+        AppEntity query = this.getById(applyId);
         ApplyDetailResponse response = new ApplyDetailResponse();
         response.setId(query.getId());
         response.setName(query.getName());
@@ -127,8 +127,8 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     @Override
     public ListResult<ApplyResponse> list(ApplyQuery query) {
-        Page<ApplyEntity> page = this.page(PageUtils.getPage(query), Wrappers.lambdaQuery(ApplyEntity.class)
-                .like(StringUtils.isNotBlank(query.getName()), ApplyEntity::getName, query.getName())
+        Page<AppEntity> page = this.page(PageUtils.getPage(query), Wrappers.lambdaQuery(AppEntity.class)
+                .like(StringUtils.isNotBlank(query.getName()), AppEntity::getName, query.getName())
         );
         if (CollectionUtils.isNotEmpty(page.getRecords())) {
             List<ApplyResponse> collect = page.getRecords().stream().map(x -> {
@@ -162,7 +162,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
         return null;
     }
 
-    public Result saveCode(String code, ApplyEntity entity) throws Exception {
+    public Result saveCode(String code, AppEntity entity) throws Exception {
         String javaName = entity.getJavaName();
         //获取路径配置
         SystemResponse system = systemService.get().getData();
@@ -180,7 +180,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
         return load(code, entity);
     }
 
-    public Result modifyCode(String code, ApplyEntity entity) throws Exception {
+    public Result modifyCode(String code, AppEntity entity) throws Exception {
         String javaName = entity.getJavaName();
         //获取路径配置
         SystemResponse system = systemService.get().getData();
@@ -196,7 +196,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
     }
 
     @Override
-    public String loadCode(ApplyEntity entity) throws Exception {
+    public String loadCode(AppEntity entity) throws Exception {
         String javaName = entity.getJavaName();
         //获取路径配置
         SystemResponse system = systemService.get().getData();
@@ -215,7 +215,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
     }
 
     @Override
-    public Result load(String code, ApplyEntity entity) throws Exception {
+    public Result load(String code, AppEntity entity) throws Exception {
         SystemResponse system = systemService.get().getData();
         String codePath = system.getCodePath();
         List<String> libJarPath = new ArrayList<>();
@@ -227,7 +227,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
                 }
             }
         }
-        ApplicationHome h = new ApplicationHome(ApplyServiceImpl.class);
+        ApplicationHome h = new ApplicationHome(AppServiceImpl.class);
         File source = h.getSource();
         if (source.getName().equals(".jar")) {
             libJarPath.add(h.getSource().getAbsolutePath());
@@ -248,8 +248,8 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
             return;
         }
         this.lambdaUpdate()
-                .set(ApplyEntity::getQuote, quote)
-                .eq(ApplyEntity::getId, Long.parseLong(applyId))
+                .set(AppEntity::getQuote, quote)
+                .eq(AppEntity::getId, Long.parseLong(applyId))
                 .update();
     }
 }
