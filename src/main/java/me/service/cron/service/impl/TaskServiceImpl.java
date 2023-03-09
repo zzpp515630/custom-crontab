@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.contents.CommonStatus;
+import me.service.cron.contents.TaskType;
 import me.service.cron.exception.TaskException;
 import me.service.cron.mapper.TaskMapper;
 import me.service.cron.model.GetResult;
@@ -89,7 +90,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
         if (!save) {
             throw new TaskException("修改定时任务失败");
         }
-        applyService.quote(Boolean.FALSE,request.getTaskType(),taskQuery.getCommand());
+        applyService.quote(Boolean.FALSE,taskQuery.getTaskType(),taskQuery.getCommand());
         applyService.quote(Boolean.TRUE,request.getTaskType(),request.getCommand());
         execute(this.getById(request.getId()));
         return Result.success();

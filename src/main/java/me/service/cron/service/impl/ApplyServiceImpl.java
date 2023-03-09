@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.InputStream;
@@ -38,8 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -58,14 +57,13 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
 
     private final SystemService systemService;
 
-    public static final DynamicClassHandler dynamicClassHandler = new DefaultDynamicClassHandlerImpl();
+    public static final DynamicClassHandler dynamicClassHandler = new DefaultDynamicClassHandlerImpl(DynamicClassHandler.CompilerType.Cmd, "/usr/local/jdk/bin");
 
     public static final Map<Long, ApplyClass> CODE_LOA_MAP = new HashMap<>(8);
 
-    private static final ExecutorService executorService = Executors.newCachedThreadPool();
-
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result create(CreateApplyRequest request) throws Exception {
         Long count = this.lambdaQuery().eq(ApplyEntity::getName, request.getName()).count();
         if (count > 0) {
@@ -225,7 +223,6 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
         if (null != files) {
             for (File file : files) {
                 if (file.getName().endsWith(".jar")) {
-                    System.out.println(file.getAbsolutePath());
                     libJarPath.add(file.getAbsolutePath());
                 }
             }
@@ -252,6 +249,7 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, ApplyEntity> impl
         }
         this.lambdaUpdate()
                 .set(ApplyEntity::getQuote, quote)
-                .eq(ApplyEntity::getId, Long.parseLong(applyId));
+                .eq(ApplyEntity::getId, Long.parseLong(applyId))
+                .update();
     }
 }

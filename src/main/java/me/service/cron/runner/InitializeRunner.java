@@ -48,7 +48,7 @@ public class InitializeRunner implements ApplicationRunner {
         //初始化任务
         initTask();
         //装载lib
-        initLib();
+//        initLib();
         //初始化class
         initClass();
     }
