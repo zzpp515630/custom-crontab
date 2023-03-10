@@ -64,6 +64,11 @@ public class SystemEntity {
     private String emailPort;
 
     /**
+     * 命令路径
+     */
+    private String cmdPath;
+
+    /**
      * 代码路径
      */
     private String codePath;

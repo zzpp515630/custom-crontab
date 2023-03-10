@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.service.cron.contents.CommonStatus;
 import me.service.cron.contents.CompareType;
 import me.service.cron.contents.TaskType;
+import me.service.cron.dynamic.DynamicClassFactory;
 import me.service.cron.email.EmailConfig;
 import me.service.cron.email.EmailContent;
 import me.service.cron.email.EmailSendService;
@@ -278,7 +279,8 @@ public class TaskExecute implements Runnable {
                     return new ExecuteResult(-1, "执行资源不存在！！");
                 }
                 Class<?> aClass = applyClass.getAClass();
-                Pair<Integer, String> job = (Pair<Integer, String>) AppServiceImpl.dynamicClassHandler.invoke(aClass, "job");
+                DynamicClassFactory dynamicClassFactory = SpringUtil.getBean(DynamicClassFactory.class);
+                Pair<Integer, String> job = (Pair<Integer, String>) dynamicClassFactory.getDynamicClassHandler().invoke(aClass, "job");
                 System.out.println("java running:"+JSONObject.toJSONString(job));
                 return new ExecuteResult(job.getKey() == 0 ? 1 : -1, job.getValue());
             } catch (Exception e) {

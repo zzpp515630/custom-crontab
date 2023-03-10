@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.contents.TaskType;
+import me.service.cron.dynamic.DynamicClassFactory;
 import me.service.cron.mapper.AppMapper;
 import me.service.cron.model.ApplyClass;
 import me.service.cron.model.GetResult;
@@ -57,7 +58,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
 
     private final SystemService systemService;
 
-    public static final DynamicClassHandler dynamicClassHandler = new DefaultDynamicClassHandlerImpl(DynamicClassHandler.CompilerType.Cmd, "/usr/local/jdk/bin");
+    private final DynamicClassFactory dynamicClassFactory;
 
     public static final Map<Long, ApplyClass> CODE_LOA_MAP = new HashMap<>(8);
 
@@ -73,7 +74,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         AppEntity entity = new AppEntity();
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
-        entity.setJavaName(dynamicClassHandler.getClassName(code));
+        entity.setJavaName(dynamicClassFactory.getDynamicClassHandler().getClassName(code));
         entity.setQuote(Boolean.FALSE);
         this.save(entity);
         return saveCode(code, entity);
@@ -97,7 +98,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         entity.setId(query.getId());
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
-        entity.setJavaName(dynamicClassHandler.getClassName(code));
+        entity.setJavaName(dynamicClassFactory.getDynamicClassHandler().getClassName(code));
         entity.setQuote(query.getQuote());
         this.updateById(entity);
         return modifyCode(code, entity);
@@ -153,7 +154,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
     public Result running(Long applyId) {
         ApplyClass applyClass = CODE_LOA_MAP.get(applyId);
         Class<?> aClass = applyClass.getAClass();
-        Pair<Integer, String> job = (Pair<Integer, String>) dynamicClassHandler.invoke(aClass, "job");
+        Pair<Integer, String> job = (Pair<Integer, String>) (dynamicClassFactory.getDynamicClassHandler().invoke(aClass, "job"));
         return new GetResult<>(job);
     }
 
@@ -233,7 +234,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
             libJarPath.add(h.getSource().getAbsolutePath());
         }
         String javaName = entity.getJavaName();
-        Class<?> aClass = dynamicClassHandler.loadClass(javaName, libJarPath, code);
+        Class<?> aClass = dynamicClassFactory.getDynamicClassHandler().loadClass(javaName, libJarPath, code);
         ApplyClass applyClass = new ApplyClass();
         applyClass.setAClass(aClass);
         applyClass.setJavaName(javaName);

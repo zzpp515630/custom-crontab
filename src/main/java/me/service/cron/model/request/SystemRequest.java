@@ -63,6 +63,9 @@ public class SystemRequest {
      */
     @ApiModelProperty("邮件端口")
     private String emailPort;
+
+    @ApiModelProperty("命令路径")
+    private String cmdPath;
     
     @ApiModelProperty("代码路径")
     private String codePath;
