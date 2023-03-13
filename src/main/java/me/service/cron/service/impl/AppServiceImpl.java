@@ -70,14 +70,33 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         if (count > 0) {
             return Result.error("资源已存在");
         }
+
+
         String code = request.getCode();
         AppEntity entity = new AppEntity();
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
         entity.setJavaName(dynamicClassFactory.getDynamicClassHandler().getClassName(code));
         entity.setQuote(Boolean.FALSE);
+
+        String javaName = entity.getJavaName();
+        //获取路径配置
+        SystemResponse system = systemService.get().getData();
+        String codePath = system.getCodePath();
+        if (StringUtils.isBlank(codePath)) {
+            return Result.error("资源存储路径不存在");
+        }
+        File file = new File(codePath, javaName + ".java");
+        if (file.exists()) {
+            return Result.error("文件资源已存在");
+        }
+
         this.save(entity);
-        return saveCode(code, entity);
+        //保存文件
+        OutputStream outputStream = Files.newOutputStream(file.toPath());
+        IOUtils.write(code, outputStream);
+        IOUtils.closeQuietly(outputStream);
+        return load(code, entity);
     }
 
     @Override
@@ -161,24 +180,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
     @Override
     public Result unload(Long applyId) {
         return null;
-    }
-
-    public Result saveCode(String code, AppEntity entity) throws Exception {
-        String javaName = entity.getJavaName();
-        //获取路径配置
-        SystemResponse system = systemService.get().getData();
-        String codePath = system.getCodePath();
-        if (StringUtils.isBlank(codePath)) {
-            return Result.error("资源存储路径不存在");
-        }
-        File file = new File(codePath, javaName + ".java");
-        if (file.exists()) {
-            return Result.error("文件资源已存在");
-        }
-        OutputStream outputStream = Files.newOutputStream(file.toPath());
-        IOUtils.write(code, outputStream);
-        IOUtils.closeQuietly(outputStream);
-        return load(code, entity);
     }
 
     public Result modifyCode(String code, AppEntity entity) throws Exception {
