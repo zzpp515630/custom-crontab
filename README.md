@@ -13,7 +13,7 @@
 
 ### 2.1**项目架构：**
 
-Spring Boot + Spring Cloud Alibaba + Mybatis Plus + Sqlite
+Spring Boot  + Mybatis Plus + Sqlite
 
 ### 2.2**开发环境：**
 
