@@ -14,4 +14,6 @@ public interface GlobalService {
      * 清理日志
      */
     void cleanLog();
+
+    void print();
 }

@@ -3,6 +3,7 @@ package me.service.cron.timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.service.cron.service.GlobalService;
+import me.service.cron.socker.LogSocketServer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,14 @@ public class GlobalTimer {
     public void beforeDawn() {
         globalService.cleanLog();
     }
+
+
+    @Scheduled(cron = "0/5 * * * * ?")
+    public void print(){
+        globalService.print();
+    }
+
+
 
 
 }

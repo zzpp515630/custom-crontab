@@ -23,8 +23,7 @@ import me.service.cron.model.response.SystemResponse;
 import me.service.cron.service.AppService;
 import me.service.cron.service.SystemService;
 import me.service.cron.util.PageUtils;
-import me.zzpp.dynamic.core.handler.DefaultDynamicClassHandlerImpl;
-import me.zzpp.dynamic.core.handler.DynamicClassHandler;
+import me.zzpp.dynamic.core.utils.DynamicClassUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,7 +75,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         AppEntity entity = new AppEntity();
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
-        entity.setJavaName(dynamicClassFactory.getDynamicClassHandler().getClassName(code));
+        entity.setJavaName(DynamicClassUtils.getClassName(code));
         entity.setQuote(Boolean.FALSE);
 
         String javaName = entity.getJavaName();
@@ -117,7 +116,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         entity.setId(query.getId());
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
-        entity.setJavaName(dynamicClassFactory.getDynamicClassHandler().getClassName(code));
+        entity.setJavaName(DynamicClassUtils.getClassName(code));
         entity.setQuote(query.getQuote());
         this.updateById(entity);
         return modifyCode(code, entity);
@@ -235,7 +234,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
             libJarPath.add(h.getSource().getAbsolutePath());
         }
         String javaName = entity.getJavaName();
-        Class<?> aClass = dynamicClassFactory.getDynamicClassHandler().loadClass(javaName, libJarPath, code);
+        Class<?> aClass = dynamicClassFactory.getDynamicClassHandler().loadClass(libJarPath, code);
         ApplyClass applyClass = new ApplyClass();
         applyClass.setAClass(aClass);
         applyClass.setJavaName(javaName);
