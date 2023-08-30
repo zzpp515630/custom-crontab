@@ -3,7 +3,7 @@
 
 ## 1. 概述
 
-- > 基于定时系统执行shell命令和http命令，获得的结果可以进行比较再发送邮件，本系统主要用于配置定时任务，并查看管理定时任务 前端代码:https://github.com/zzpp515630/custom-crontab-manager
+- > 基于定时系统执行shell命令和java文件，获得的结果可以进行比较再发送邮件，本系统主要用于配置定时任务，并查看管理定时任务 前端代码:https://github.com/zzpp515630/custom-crontab-manager
   <img src="https://github.com/zzpp515630/custom-crontab/blob/main/src/main/resources/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20230831000822.png">
   <img src=" https://github.com/zzpp515630/custom-crontab/blob/main/src/main/resources/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20230831001007.png">
 
